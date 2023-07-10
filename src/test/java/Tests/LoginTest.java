@@ -71,8 +71,8 @@ public class LoginTest extends DriverManage {
 
     @Test
     public static void dropDown(){
-        AppiumBy formsButtton = (AppiumBy) AppiumBy.accessibilityId("Forms");
-        getAppiumDriver().findElement(formsButtton).click();
+        AppiumBy formsButton = (AppiumBy) AppiumBy.accessibilityId("Forms");
+        getAppiumDriver().findElement(formsButton).click();
         AppiumBy dropDown = (AppiumBy) AppiumBy.accessibilityId("Dropdown");
         getAppiumDriver().findElement(dropDown).click();
         By secondOption = By.xpath("//*[@text='Appium is awesome']");
@@ -80,6 +80,21 @@ public class LoginTest extends DriverManage {
         String isSelected = getAppiumDriver().findElement(secondOption).getAttribute("checked");
         Assert.assertEquals(isSelected,"false");
         System.out.println("Is element selected" + isSelected);
+    }
+
+    @Test
+    public static void Switch(){
+        AppiumBy formsButton = (AppiumBy) AppiumBy.accessibilityId("Forms");
+        getAppiumDriver().findElement(formsButton).click();
+        AppiumBy switchText = (AppiumBy) AppiumBy.accessibilityId("switch-text");
+        String switchTextBeforeClick = getAppiumDriver().findElement(switchText).getText();
+        Assert.assertEquals(switchTextBeforeClick, "Click to turn the switch ON");
+        System.out.println("Switch Text Before Click= " + switchTextBeforeClick);
+        AppiumBy switchButton = (AppiumBy) AppiumBy.accessibilityId("switch");
+        getAppiumDriver().findElement(switchButton).click();
+        String switchTextAfterClick = getAppiumDriver().findElement(switchText).getText();
+        Assert.assertEquals(switchTextAfterClick, "Click to turn the switch OFF");
+        System.out.println("Switch Text After Click = " + switchTextAfterClick);
     }
 
     @AfterTest

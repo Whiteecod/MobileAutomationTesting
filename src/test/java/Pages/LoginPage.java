@@ -1,15 +1,15 @@
 package Pages;
 
-import Utility.DriverManage;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
+import utilities.DriverManager;
 
-public class LoginPage extends DriverManage {
+public class LoginPage extends DriverManager {
      AndroidDriver driver = getAppiumDriver();
 
-     public void LoginPage() {
+     public void loginPage() {
          PageFactory.initElements(driver , this);
      }
 

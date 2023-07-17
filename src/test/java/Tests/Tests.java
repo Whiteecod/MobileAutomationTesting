@@ -6,16 +6,12 @@ import Pages.LoginPage;
 import Pages.SwipePage;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.options.UiAutomator2Options;
-import io.appium.java_client.remote.AutomationName;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Pause;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -23,14 +19,13 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import utilities.DriverManager;
+import utilities.PageActionsHelper;
 
-import java.awt.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 
-public class LoginTest extends DriverManager {
+public class Tests extends DriverManager {
 
     AndroidDriver driver;
     WebDriverWait wait;
@@ -38,6 +33,7 @@ public class LoginTest extends DriverManager {
     FormsPage formsPage = new FormsPage();
     SwipePage swipePage = new SwipePage();
     DragPage dragPage = new DragPage();
+    PageActionsHelper pageActionsHelper = new PageActionsHelper();
 
     @BeforeTest
     public void setUp() {
@@ -89,42 +85,63 @@ public class LoginTest extends DriverManager {
     public void scrollDown() {
         getAppiumDriver().findElement(swipePage.swipeMenu).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(swipePage.swipePageText));
-        Dimension size = getAppiumDriver().manage().window().getSize();
-        System.out.println("size = " + size);
-        int startX = size.getWidth() / 2;
-        int startY = (int) (size.getHeight() * 0.8);
-        int endX = startX;
-        int endY = (int) (size.getHeight() * 0.1);
-
-        PointerInput finger1 = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
-        Sequence sequence = new Sequence(finger1, 0)
-                .addAction(finger1.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), startX, startY))
-                .addAction(finger1.createPointerDown(PointerInput.MouseButton.LEFT.asArg()))
-                .addAction(new Pause(finger1, Duration.ofMillis(200)))
-                .addAction(finger1.createPointerMove(Duration.ofMillis(100), PointerInput.Origin.viewport(), endX, endY))
-                .addAction(finger1.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
-        getAppiumDriver().perform(Collections.singletonList(sequence));
+        pageActionsHelper.performScroll("down");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(swipePage.logo));
+        Assert.assertTrue(getAppiumDriver().findElement(swipePage.logo).isDisplayed());
+        if (getAppiumDriver().findElement(By.xpath("//*[@text='You found me!!!']")).isDisplayed()) {
+            System.out.println("I found you!");
+        }
     }
 
     @Test
-    public void scrollRight() {
+    public void scrollRightEnd() {
         getAppiumDriver().findElement(swipePage.swipeMenu).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(swipePage.swipePageText));
-        Dimension size = getAppiumDriver().manage().window().getSize();
-        System.out.println("size = " + size);
-        int startX = (int) (size.getWidth() * 0.9);
-        int startY = (int) (size.getHeight() * 0.8 );
-        int endX = (int) (size.getWidth() * 0.1);
-        int endY = startY;
+        List<WebElement> listElementsButton = getAppiumDriver().findElements(swipePage.allButtons);
+        for (int i = 0; i < listElementsButton.size(); i++) {
+            pageActionsHelper.performScroll("right");
+/*
+            PointerInput finger1 = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
+            Sequence sequence = new Sequence(finger1, 0)
+                    .addAction(finger1.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), startX, startY))
+                    .addAction(finger1.createPointerDown(PointerInput.MouseButton.LEFT.asArg()))
+                    .addAction(new Pause(finger1, Duration.ofMillis(200)))
+                    .addAction(finger1.createPointerMove(Duration.ofMillis(300), PointerInput.Origin.viewport(), endX, endY))
+                    .addAction(finger1.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+            getAppiumDriver().perform(Collections.singletonList(sequence));
 
-        PointerInput finger1 = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
-        Sequence sequence = new Sequence(finger1, 0)
-                .addAction(finger1.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), startX, startY))
-                .addAction(finger1.createPointerDown(PointerInput.MouseButton.LEFT.asArg()))
-                .addAction(new Pause(finger1, Duration.ofMillis(200)))
-                .addAction(finger1.createPointerMove(Duration.ofMillis(100), PointerInput.Origin.viewport(), endX, endY))
-                .addAction(finger1.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
-        getAppiumDriver().perform(Collections.singletonList(sequence));
+ */
+        }
+        Assert.assertTrue(getAppiumDriver().findElement(swipePage.lastElement).isDisplayed());
+    }
+
+    @Test
+    public void dragAndDrop() throws InterruptedException {
+        getAppiumDriver().findElement(dragPage.dragMenu).click();
+
+        String leftCenterRight = "lcr";
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < leftCenterRight.length(); j++) {
+                char c = leftCenterRight.charAt(j);
+                WebElement source = getAppiumDriver().findElement(AppiumBy.accessibilityId("drag-" + c + String.valueOf(i)));
+                WebElement target = getAppiumDriver().findElement(AppiumBy.accessibilityId("drop-" + c + String.valueOf(i)));
+
+                Point sourceElementCenter = new Point(source.getLocation().getX() + source.getSize().getWidth() / 2,
+                        source.getLocation().getY() + source.getSize().getHeight() / 2);
+                Point targetElementCenter = new Point(target.getLocation().getX() + target.getSize().getWidth() / 2,
+                        target.getLocation().getY() + target.getSize().getHeight() / 2);
+
+                PointerInput finger1 = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
+                Sequence sequence = new Sequence(finger1, 1)
+                        .addAction(finger1.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), sourceElementCenter))
+                        .addAction(finger1.createPointerDown(PointerInput.MouseButton.LEFT.asArg()))
+                        .addAction(new Pause(finger1, Duration.ofMillis(200)))
+                        .addAction(finger1.createPointerMove(Duration.ofMillis(100), PointerInput.Origin.viewport(), targetElementCenter))
+                        .addAction(finger1.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+                getAppiumDriver().perform(Collections.singletonList(sequence));
+                Thread.sleep(5000);
+            }
+        }
     }
 
     @AfterTest
